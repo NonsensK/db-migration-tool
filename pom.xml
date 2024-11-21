@@ -1,0 +1,67 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <!-- Информация о проекте -->
+    <groupId>com.example.migration</groupId>
+    <artifactId>db-migration-tool</artifactId>
+    <version>1.0-SNAPSHOT</version>
+
+    <!-- Зависимости -->
+    <dependencies>
+        <!-- JDBC для работы с PostgreSQL -->
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>42.6.0</version>
+        </dependency>
+
+        <!-- Logback для логирования -->
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.4.11</version>
+        </dependency>
+
+        <!-- JUnit для юнит-тестирования -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <version>5.8.2</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <version>5.8.2</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- H2 для тестирования (база данных в памяти)
+        H2 — это база данных, которая используется для тестирования.
+        Она работает в памяти, что удобно для юнит-тестов. -->
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <version>1.4.200</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Mockito для мокирования объектов в тестах
+         Mockito — это библиотека для создания моков в тестах,
+         чтобы изолировать компоненты, которые тестируются.-->
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>4.3.1</version>
+            <scope>test</scope>
+        </dependency>
+
+    </dependencies>
+</project>
+
+<!--    JUnit — для написания тестов.
+        H2 — для использования базы данных, которая будет работать только в памяти.
+        Mockito — если тебе нужно будет мокировать (имитировать) какие-то части кода для тестов.-->
+
