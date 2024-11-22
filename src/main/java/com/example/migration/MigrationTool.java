@@ -12,11 +12,8 @@ public class MigrationTool {
 
     // Конструктор для инициализации всех компонентов
     public MigrationTool() {
-        this.connectionManager = new ConnectionManager(
-                "jdbc:postgresql://localhost:5432/mydatabase", // URL базы данных
-                "your-username", // Логин
-                "your-password"  // Пароль
-        );
+        // Используем новый ConnectionManager, который автоматически загружает параметры из application.properties
+        this.connectionManager = new ConnectionManager();
         this.migrationExecutor = new MigrationExecutor();
         this.migrationFileReader = new MigrationFileReader("migrations"); // Путь к папке миграций
     }
@@ -27,7 +24,7 @@ public class MigrationTool {
             // Получаем список файлов миграций
             List<String> migrationFiles = migrationFileReader.readMigrationFiles();
             for (String migrationFile : migrationFiles) {
-                // Для каждого файла вызываем ваш метод executeMigration
+                // Для каждого файла вызываем метод executeMigration
                 migrationExecutor.executeMigration(connection, migrationFile);
             }
             System.out.println("Все миграции успешно применены.");

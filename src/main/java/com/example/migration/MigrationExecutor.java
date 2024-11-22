@@ -17,23 +17,28 @@ public class MigrationExecutor {
      * @param connection - подключение к базе данных
      * @param migrationFilePath - путь к файлу миграции (SQL)
      */
-
-    //Метод executeMigration: Этот метод принимает подключение к базе данных и путь к файлу миграции.
-    // Затем он читает содержимое SQL-файла и выполняет его на базе данных.
     public void executeMigration(Connection connection, String migrationFilePath) {
-
-        //Метод readMigrationFile: Этот метод читает SQL-скрипт из файла и
-        // по указанному пути и возвращает его содержимое как строку.
+        // Чтение SQL-скрипта из файла миграции
         String sql = readMigrationFile(migrationFilePath);
         if (sql == null) {
             logger.error("Не удалось прочитать файл миграции: " + migrationFilePath);
             return;
         }
 
-        // Выполняем SQL-скрипт
+        // Выполнение SQL-скрипта
         try (Statement statement = connection.createStatement()) {
+            // Выполнение миграции
             statement.executeUpdate(sql);
             logger.info("Миграция выполнена успешно: " + migrationFilePath);
+
+            // Извлекаем версию миграции из пути файла
+            String version = extractVersion(migrationFilePath);
+
+            // Записываем выполненную миграцию в таблицу migration_history
+            String insertHistorySql = "INSERT INTO migration_history (version) VALUES ('" + version + "')";
+            statement.executeUpdate(insertHistorySql);
+            logger.info("Миграция добавлена в историю: " + version);
+
         } catch (SQLException e) {
             logger.error("Ошибка при выполнении миграции: " + migrationFilePath, e);
         }
@@ -52,5 +57,15 @@ public class MigrationExecutor {
             logger.error("Ошибка при чтении файла миграции: " + filePath, e);
             return null;
         }
+    }
+
+    /**
+     * Извлекает версию миграции из имени файла (например, V1 из V1__create_migration_history.sql).
+     * @param migrationFilePath - путь к файлу миграции
+     * @return версия миграции
+     */
+    private String extractVersion(String migrationFilePath) {
+        // Извлекаем версию из имени файла миграции (например, V1, V2, V3 и т.д.)
+        return migrationFilePath.split("__")[0].substring(1);
     }
 }

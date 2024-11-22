@@ -24,6 +24,20 @@
             <version>1.4.11</version>
         </dependency>
 
+        <!-- SLF4J API для логирования -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>1.7.32</version>
+        </dependency>
+
+        <!-- SLF4J Simple Logger для простого логирования -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>1.7.32</version>
+        </dependency>
+
         <!-- JUnit для юнит-тестирования -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
@@ -38,9 +52,7 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- H2 для тестирования (база данных в памяти)
-        H2 — это база данных, которая используется для тестирования.
-        Она работает в памяти, что удобно для юнит-тестов. -->
+        <!-- H2 для тестирования (база данных в памяти) -->
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
@@ -48,9 +60,7 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- Mockito для мокирования объектов в тестах
-         Mockito — это библиотека для создания моков в тестах,
-         чтобы изолировать компоненты, которые тестируются.-->
+        <!-- Mockito для мокирования объектов в тестах -->
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
@@ -59,9 +69,47 @@
         </dependency>
 
     </dependencies>
+
+    <build>
+        <plugins>
+            <!-- Плагин для создания JAR файла с зависимостями -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>3.3.0</version>
+                <configuration>
+                    <archive>
+                        <manifestEntries>
+                            <Main-Class>com.example.migration.MigrationTool</Main-Class> <!-- Укажите ваш главный класс -->
+                        </manifestEntries>
+                    </archive>
+                    <descriptorRefs>
+                        <descriptorRef>jar-with-dependencies</descriptorRef> <!-- Собираем JAR с зависимостями -->
+                    </descriptorRefs>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal> <!-- Создание единого JAR файла с зависимостями -->
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- Плагин для создания JAR файла -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.2.0</version>
+                <configuration>
+                    <archive>
+                        <manifestEntries>
+                            <Main-Class>com.example.migration.MigrationTool</Main-Class> <!-- Укажите ваш главный класс здесь -->
+                        </manifestEntries>
+                    </archive>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>
-
-<!--    JUnit — для написания тестов.
-        H2 — для использования базы данных, которая будет работать только в памяти.
-        Mockito — если тебе нужно будет мокировать (имитировать) какие-то части кода для тестов.-->
-

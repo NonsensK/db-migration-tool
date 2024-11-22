@@ -1,0 +1,66 @@
+# DB Migration Tool
+
+This project is a library for managing database migrations using JDBC. It is built to be easy to integrate into other Java applications and provides functionality for version control and migration history tracking.
+
+## Features
+- **Apply migrations**: Apply database migrations defined in SQL files.
+- **Version control**: The tool tracks the current version of the database and applies only the necessary migrations.
+- **Rollback**: Ability to rollback to a specific database version.
+- **Sync migrations**: Prevent concurrent migrations from being executed by different users.
+- **Logging**: The migration process is logged, including successful executions and errors.
+- **Migration history**: The migration history is stored in a special database table (similar to Flyway).
+
+## Requirements
+- Java 8 or higher
+- PostgreSQL (or another supported database)
+- Maven or Gradle for building the project
+
+## Setup
+
+### Clone the repository
+
+```bash
+git clone https://github.com/NonsensK/db-migration-tool.git
+cd db-migration-tool
+Configure the database connection
+The database connection parameters are defined in the src/main/resources/application.properties file:
+
+properties
+Копировать код
+# Database connection parameters
+db.url=jdbc:postgresql://localhost:5432/migration_db
+db.username=postgres
+db.password=password
+
+# Migration path
+migration.path=classpath:migrations/
+Apply migrations
+To apply the migrations, use the following command:
+
+bash
+Копировать код
+java -jar target/db-migration-tool.jar
+This will apply all available migrations in the correct order.
+
+Rollback to a specific version
+The tool also supports rolling back migrations. Run the following command to rollback:
+
+bash
+Копировать код
+java -jar target/db-migration-tool.jar rollback
+Logging
+The migration process is logged, and you can find the log files under the logs/ directory.
+
+Structure
+bash
+Копировать код
+.
+├── .idea/                        # IntelliJ IDEA project files
+├── src/                          # Source code
+│   └── main/java/com/example/migration/  # Migration logic
+├── pom.xml                       # Maven build file
+├── src/main/resources/           # Migration SQL files
+│   ├── V1_create_migration_history.sql
+│   ├── V2_create_users_table.sql
+│   └── V3_add_index_to_users.sql
+├── application.properties        # Configuration for the database connectio
