@@ -12,7 +12,8 @@ This project is a library for managing database migrations using JDBC. It helps 
 1. Clone the repository:
 
     ```bash
-    git clone https://github.com/your-username/db-migration-tool.git
+    git clone https://github.com/NonsensK/db-migration-tool.git
+
     cd db-migration-tool
     ```
 
