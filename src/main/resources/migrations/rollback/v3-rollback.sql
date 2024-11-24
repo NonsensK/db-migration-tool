@@ -1,2 +1,1 @@
-ALTER TABLE users DROP COLUMN name;
-
+DROP INDEX IF EXISTS idx_users_name;

@@ -1,22 +1,22 @@
 package com.example.migration;
 
+import java.sql.Connection;
+
 public class Main {
     public static void main(String[] args) {
         System.out.println("Добро пожаловать в инструмент миграций!");
 
-        // Создаем объект MigrationTool
-        MigrationTool migrationTool = new MigrationTool();
+        ConnectionManager connectionManager = new ConnectionManager();
+        try (Connection connection = connectionManager.getConnection()) {
+            MigrationTool tool = new MigrationTool();
 
-        // Выполняем миграции
-        System.out.println("Запуск миграций...");
-        migrationTool.migrate();
+            System.out.println("Запуск миграций...");
+            tool.migrate(connection);
 
-        // Проверяем статус базы данных
-        System.out.println("Проверка статуса базы данных...");
-        migrationTool.checkStatus();
-
-        // Заглушка для отката миграции
-        System.out.println("Откат миграции...");
-        migrationTool.rollback();
+            System.out.println("Запуск откатов...");
+            tool.rollback(connection);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

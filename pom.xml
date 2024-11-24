@@ -8,6 +8,12 @@
     <artifactId>db-migration-tool</artifactId>
     <version>1.0-SNAPSHOT</version>
 
+    <!-- Свойства -->
+    <properties>
+        <maven.compiler.source>17</maven.compiler.source> <!-- Уровень Java -->
+        <maven.compiler.target>17</maven.compiler.target>
+    </properties>
+
     <!-- Зависимости -->
     <dependencies>
         <!-- JDBC для работы с PostgreSQL -->

@@ -1,5 +1,5 @@
-CREATE TABLE migration_history (
-             id SERIAL PRIMARY KEY,                -- Уникальный идентификатор
-             migration_name VARCHAR(255) NOT NULL UNIQUE, -- Имя файла миграции
-             applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP -- Время выполнения миграции
-);
+CREATE TABLE IF NOT EXISTS migration_history (
+                                                 id SERIAL PRIMARY KEY,
+                                                 migration_file VARCHAR(255) NOT NULL,
+    applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );

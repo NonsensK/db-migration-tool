@@ -1,122 +1,94 @@
 package com.example.migration;
 
-import java.io.BufferedReader; // Для чтения SQL-файлов строка за строкой.
-import java.io.IOException; // Исключения, связанные с I/O операциями.
-import java.io.InputStream; // Поток для чтения байтов из ресурсов.
-import java.io.InputStreamReader; // Преобразует байтовый поток в символьный.
-import java.util.ArrayList; // Используется для хранения списка SQL-скриптов.
-import java.util.List; // Коллекция для работы с массивами и списками.
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.List;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 
 /**
- * Класс для чтения SQL-файлов миграций и откатов из указанных директорий.
- * Читает содержимое SQL-скриптов и возвращает их в виде строк.
+ * Класс для чтения SQL-файлов миграций и откатов.
  */
 public class MigrationFileReader {
-
-    private final String migrationsPath; // Путь к папке миграций.
-
-    /**
-     * Конструктор, принимает путь к папке миграций.
-     * Например: resources/migrations.
-     *
-     * @param migrationsPath путь к папке миграций.
-     */
-    public MigrationFileReader(String migrationsPath) {
-        this.migrationsPath = migrationsPath;
-    }
+    private static final Logger logger = LoggerFactory.getLogger(MigrationFileReader.class);
 
     /**
-     * Метод для чтения SQL-файлов миграций.
-     * Открывает папку с миграциями (например, resources/migrations),
-     * читает файлы и добавляет их содержимое в список.
+     * Возвращает список всех файлов в указанной директории.
      *
-     * @return список SQL-скриптов миграций.
+     * @param directoryPath путь к директории.
+     * @return список файлов.
      */
-    public List<String> readMigrationFiles() {
-        List<String> sqlScripts = new ArrayList<>();
+    public List<String> listFiles(String directoryPath) {
+        logger.debug("Чтение файлов из директории: {}", directoryPath);
+        List<String> fileList = new ArrayList<>();
+
         try {
-            // Получаем список файлов в папке миграций.
-            InputStream resourceStream = getClass().getClassLoader().getResourceAsStream(migrationsPath);
-            if (resourceStream == null) {
-                throw new IOException("Migration path not found: " + migrationsPath);
-            }
+            // Проверяем, запущено ли приложение из JAR-файла
+            String jarPath = getClass().getProtectionDomain().getCodeSource().getLocation().getPath();
+            if (jarPath.endsWith(".jar")) {
+                // Чтение из JAR
+                try (JarFile jarFile = new JarFile(jarPath)) {
+                    Enumeration<JarEntry> entries = jarFile.entries();
+                    while (entries.hasMoreElements()) {
+                        JarEntry entry = entries.nextElement();
+                        if (entry.getName().startsWith(directoryPath) && !entry.isDirectory()) {
+                            fileList.add(entry.getName());
+                        }
+                    }
+                }
+            } else {
+                // Чтение из файловой системы
+                InputStream resourceStream = getClass().getClassLoader().getResourceAsStream(directoryPath);
+                if (resourceStream == null) {
+                    throw new IOException("Directory not found: " + directoryPath);
+                }
 
-            BufferedReader reader = new BufferedReader(new InputStreamReader(resourceStream));
-            String fileName;
-            while ((fileName = reader.readLine()) != null) {
-                // Для каждого файла читаем его содержимое.
-                InputStream fileStream = getClass().getClassLoader().getResourceAsStream(migrationsPath + "/" + fileName);
-                if (fileStream != null) {
-                    sqlScripts.add(readFileContent(fileStream));
+                try (BufferedReader reader = new BufferedReader(new InputStreamReader(resourceStream))) {
+                    String fileName;
+                    while ((fileName = reader.readLine()) != null) {
+                        if (!fileName.endsWith("/")) { // Исключаем директории
+                            fileList.add(directoryPath + "/" + fileName);
+                        }
+                    }
                 }
             }
         } catch (IOException e) {
-            // Логируем ошибку, если файл не найден или произошла ошибка чтения.
-            System.err.println("Error reading migration files: " + e.getMessage());
+            logger.error("Ошибка чтения файлов из директории: {}", directoryPath, e);
         }
-        return sqlScripts; // Возвращаем список всех прочитанных скриптов миграций.
+
+        return fileList;
     }
 
     /**
-     * Метод для чтения SQL-файлов откатов из папки rollback.
-     * Папка rollback содержит файлы откатов, которые позволяют отменить изменения,
-     * сделанные миграциями. Этот метод возвращает список SQL-скриптов откатов.
+     * Читает содержимое SQL-файла.
      *
-     * @return список SQL-скриптов откатов.
+     * @param filePath путь к файлу.
+     * @return содержимое файла как строка.
      */
-    public List<String> readRollbackFiles() {
-        // Создаем список для хранения содержимого SQL-скриптов откатов
-        List<String> rollbackScripts = new ArrayList<>();
-
-        try {
-            // Находим папку rollback внутри указанного пути миграций
-            InputStream resourceStream = getClass().getClassLoader().getResourceAsStream(migrationsPath + "/rollback");
-
-            // Если папка rollback не найдена, выбрасываем исключение
-            if (resourceStream == null) {
-                throw new IOException("Rollback path not found: " + migrationsPath + "/rollback");
+    public String readFileContent(String filePath) {
+        logger.debug("Чтение содержимого файла: {}", filePath);
+        try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream(filePath)) {
+            if (inputStream == null) {
+                throw new IOException("File not found: " + filePath);
             }
-
-            // Читаем список файлов из папки rollback
-            BufferedReader reader = new BufferedReader(new InputStreamReader(resourceStream));
-            String fileName;
-
-            // Проходим по каждому файлу в папке rollback
-            while ((fileName = reader.readLine()) != null) {
-                // Находим полный путь к файлу отката
-                InputStream fileStream = getClass().getClassLoader().getResourceAsStream(migrationsPath + "/rollback/" + fileName);
-
-                // Если файл найден, читаем его содержимое
-                if (fileStream != null) {
-                    rollbackScripts.add(readFileContent(fileStream)); // Добавляем содержимое файла в список
+            StringBuilder content = new StringBuilder();
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    content.append(line).append("\n");
                 }
             }
+            return content.toString();
         } catch (IOException e) {
-            // Если произошла ошибка (например, файл не найден или проблемы с доступом),
-            // выводим сообщение об ошибке в консоль
-            System.err.println("Error reading rollback files: " + e.getMessage());
+            logger.error("Ошибка чтения файла: {}", filePath, e);
+            return null;
         }
-
-        // Возвращаем список SQL-скриптов откатов
-        return rollbackScripts;
-    }
-
-    /**
-     * Метод для чтения содержимого SQL-файла.
-     * Построчно читает файл и сохраняет его содержимое в строку.
-     *
-     * @param inputStream поток файла.
-     * @return содержимое файла в виде строки.
-     * @throws IOException если произошла ошибка при чтении файла.
-     */
-    private String readFileContent(InputStream inputStream) throws IOException {
-        StringBuilder content = new StringBuilder();
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                content.append(line).append("\n");
-            }
-        }
-        return content.toString(); // Возвращаем содержимое файла как одну строку.
     }
 }
