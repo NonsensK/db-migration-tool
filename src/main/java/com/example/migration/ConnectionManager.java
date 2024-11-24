@@ -1,13 +1,17 @@
 package com.example.migration;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.util.Properties;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ConnectionManager {
+    private static final Logger logger = LoggerFactory.getLogger(ConnectionManager.class);
+
     private String dbUrl;
     private String dbUser;
     private String dbPassword;
@@ -19,21 +23,24 @@ public class ConnectionManager {
 
     private void loadProperties() {
         try {
-            // Загружаем application.properties
+            // Загружаем application.properties из classpath
             Properties properties = new Properties();
-            FileInputStream input = new FileInputStream("src/main/resources/application.properties");
 
-            properties.load(input);
+            try (InputStream input = getClass().getClassLoader().getResourceAsStream("application.properties")) {
+                if (input == null) {
+                    throw new IOException("Файл application.properties не найден");
+                }
+                properties.load(input);
+            }
 
             // Получаем значения параметров
             dbUrl = properties.getProperty("db.url");
             dbUser = properties.getProperty("db.username");
             dbPassword = properties.getProperty("db.password");
 
-            input.close();
         } catch (IOException e) {
-            System.err.println("Ошибка загрузки файла application.properties: " + e.getMessage());
-            e.printStackTrace();
+            logger.error("Ошибка загрузки файла application.properties: {}", e.getMessage(), e);
+            throw new RuntimeException("Не удалось загрузить параметры базы данных", e);
         }
     }
 
@@ -45,9 +52,9 @@ public class ConnectionManager {
         ConnectionManager connectionManager = new ConnectionManager();
 
         try (Connection connection = connectionManager.getConnection()) {
-            System.out.println("Соединение с базой данных успешно установлено!");
+            logger.info("Соединение с базой данных успешно установлено!");
         } catch (SQLException e) {
-            System.err.println("Ошибка подключения к базе данных: " + e.getMessage());
+            logger.error("Ошибка подключения к базе данных: {}", e.getMessage(), e);
         }
     }
 }

@@ -28,27 +28,20 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-            <version>1.7.32</version>
-        </dependency>
-
-        <!-- SLF4J Simple Logger для простого логирования -->
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-simple</artifactId>
-            <version>1.7.32</version>
+            <version>2.0.9</version>
         </dependency>
 
         <!-- JUnit для юнит-тестирования -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
-            <version>5.8.2</version>
+            <version>5.10.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>
-            <version>5.8.2</version>
+            <version>5.10.0</version>
             <scope>test</scope>
         </dependency>
 
@@ -56,7 +49,7 @@
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
-            <version>1.4.200</version>
+            <version>2.2.220</version>
             <scope>test</scope>
         </dependency>
 
@@ -64,13 +57,22 @@
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
-            <version>4.3.1</version>
+            <version>4.11.0</version>
             <scope>test</scope>
         </dependency>
-
     </dependencies>
 
+    <!-- Сборка -->
     <build>
+        <resources>
+            <!-- Копирование всех ресурсов из src/main/resources -->
+            <resource>
+                <directory>src/main/resources</directory>
+                <includes>
+                    <include>**/*</include>
+                </includes>
+            </resource>
+        </resources>
         <plugins>
             <!-- Плагин для создания JAR файла с зависимостями -->
             <plugin>
@@ -79,34 +81,34 @@
                 <version>3.3.0</version>
                 <configuration>
                     <archive>
-                        <manifestEntries>
-                            <Main-Class>com.example.migration.MigrationTool</Main-Class> <!-- Укажите ваш главный класс -->
-                        </manifestEntries>
+                        <manifest>
+                            <mainClass>com.example.migration.MigrationTool</mainClass>
+                        </manifest>
                     </archive>
                     <descriptorRefs>
-                        <descriptorRef>jar-with-dependencies</descriptorRef> <!-- Собираем JAR с зависимостями -->
+                        <descriptorRef>jar-with-dependencies</descriptorRef>
                     </descriptorRefs>
                 </configuration>
                 <executions>
                     <execution>
                         <phase>package</phase>
                         <goals>
-                            <goal>single</goal> <!-- Создание единого JAR файла с зависимостями -->
+                            <goal>single</goal>
                         </goals>
                     </execution>
                 </executions>
             </plugin>
 
-            <!-- Плагин для создания JAR файла -->
+            <!-- Плагин для создания стандартного JAR -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
-                <version>3.2.0</version>
+                <version>3.2.2</version>
                 <configuration>
                     <archive>
-                        <manifestEntries>
-                            <Main-Class>com.example.migration.MigrationTool</Main-Class> <!-- Укажите ваш главный класс здесь -->
-                        </manifestEntries>
+                        <manifest>
+                            <mainClass>com.example.migration.MigrationTool</mainClass>
+                        </manifest>
                     </archive>
                 </configuration>
             </plugin>
